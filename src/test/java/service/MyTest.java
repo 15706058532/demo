@@ -448,10 +448,24 @@ public class MyTest {
 
     @Test
     public void test14() throws IOException {
-        Document document = Jsoup.connect("https://store.taobao.com/shop/view_shop.htm?user_number_id=2200660685808&rn=b3941d00bca5af9eae2136bf6534c28b").execute().parse();
-        Elements mallSearch = document.getElementsByClass("mallSearch-input");
-        Element element = mallSearch.get(0);
-        String attr = element.child(0).child(0).attr("data-current");
-        System.out.println(attr);
+        String url = "https://store.taobao.com/shop/view_shop.htm?user_number_id=2200660685808&rn=b3941d00bca5af9eae2136bf6534c28b";
+//        Document document = Jsoup.connect(url).execute().parse();
+//        Elements mallSearch = document.getElementsByClass("mallSearch-input");
+//        Element element = mallSearch.get(0);
+//        String attr = element.child(0).child(0).attr("data-current");
+//        if(!attr.startsWith("http")){
+//            attr = "https://"+attr.replaceAll("/","");
+//        }
+//        System.out.println(attr);
+//        Element lineZing = document.getElementById("LineZing");
+//        String shopid = lineZing.attr("shopid");
+//        System.out.println(shopid);
+        String pattern = "user_number_id=(.*)&";
+        Pattern r = Pattern.compile(pattern);
+        // 现在创建 matcher 对象
+        Matcher m = r.matcher(url);
+        if (m.find( )) {
+            System.out.println("Found value: " + m.group(1) );
+        }
     }
 }
