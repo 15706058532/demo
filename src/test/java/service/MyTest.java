@@ -23,6 +23,7 @@ import java.net.*;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Created by Habit on 2017-07-01.
@@ -48,22 +49,25 @@ public class MyTest {
         //图片的输出路径
         File outFile = new File("E:/test.png");
         //宽度和高度
-        int width = 300, height = 300;
+        int width = 200, height = 200;
         //字体设置
-        Font font = new Font("宋体", Font.BOLD, 300);
+        Font font = new Font("微软雅黑", Font.PLAIN, 100);
         //内容
-        String value = "我";
+        String value = "自";
         //背景色
-        Color blackColor = Color.WHITE;
+        Color blackColor = new Color(3, 169, 244);
         //字体颜色
-        Color frontColor = Color.BLACK;
+        Color frontColor = new Color(255, 255, 255);
         // 创建图片
         BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_BGR);
         Graphics g = image.getGraphics();
         g.setClip(0, 0, width, height);
-        g.setColor(blackColor);
-        // 先用黑色填充整张图片,也就是背景
+        // 先用白色填充整张图片,也就是背景
+        g.setColor(Color.WHITE);
         g.fillRect(0, 0, width, height);
+        //用蓝色色圆形填充整张图片,也就是背景
+        g.setColor(blackColor);
+        g.fillOval(0, 0, width, height);
         // 在换成红色
         g.setColor(frontColor);
         // 设置画笔字体
@@ -376,5 +380,78 @@ public class MyTest {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @Test
+    public void test12() throws IOException {
+        File file = new File("C:\\Users\\15706\\Desktop\\玫琳凯biz.txt");
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+        StringBuilder builder = new StringBuilder();
+        while (bufferedReader.ready()) {
+            builder.append(bufferedReader.readLine());
+            if (bufferedReader.ready()) {
+                builder.append(",");
+            }
+        }
+        File outFile = new File("C:\\Users\\15706\\Desktop\\mk_biz.txt");
+        BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outFile)));
+        bufferedWriter.write(builder.toString());
+        bufferedWriter.flush();
+        bufferedReader.close();
+        bufferedWriter.close();
+        System.out.println(builder.toString());
+//        String text = "";
+//        String[] split = text.split("\n");
+//        for (String s : split) {
+//            System.out.println("\"" + s + "\",");
+//        }
+    }
+
+    @Test
+    public void test13() throws IOException {
+        String url = "https://weixin.sogou.com/weixin?type=1&s_from=input&query=%E6%AC%A7%E8%8E%B1%E9%9B%85&ie=utf8&_sug_=n&_sug_type_=";
+        Connection connect = Jsoup.connect(url);
+        connect.header("user-agent", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36");
+        Connection.Response response = connect.execute();
+        Document parse = response.parse();
+        Elements select = parse.select(".news-list2");
+        Elements children = select.first().children();
+        children.stream().map(element -> {
+            Element child = element.child(0);
+            Element child1 = child.child(1);
+            Element child2 = child1.child(0);
+            Element child3 = child2.child(0);
+            System.out.println(child3.attr("href"));
+            Map<String, String> cookies = response.cookies();
+            Connection href = Jsoup.connect("https://weixin.sogou.com/link?url=dn9a_-gY295K0Rci_xozVXfdMkSQTLW6cwJThYulHEtVjXrGTiVgS3vYg77PfLwIhUFCDSq5Ytts3a6ZG5XbCVqXa8Fplpd9RDYJNE-V8GNBfhTZsZr8JHyFZgIHT1GxzvHCZz5Jlu3jHhVGHlzlLXJNtChorNCktS5M4mG9Ox0DpAonVhFvY5S-T0FBALHbdLudUwBExCQoY68RfRpXVOpjqA9sWUnWLm6ISzdJ7m21ZRd7QrH9aquitkInNia69Js_CimvViZCy6umSSPEsg..&type=1&query=%E6%AC%A7%E8%8E%B1%E9%9B%85&k=47&h=D")/*.proxy(proxy)*/;
+            href.cookies(connect.request().cookies());
+            href.headers(connect.request().headers());
+            try {
+                Document document = href.execute().parse();
+                Elements script = document.getElementsByTag("script");
+                String text = script.text();
+                text = text.replace("\r\n", "").replace("\n", "")
+                        .replace(" ", "").replace("var url = '';", "")
+                        .replace("var url = 'url += '", "").replace("';", "")
+                        .replace(" url.replace(\"@\", \"\");", "").replace("window.location.replace(url)", "");
+                System.out.println(text);
+                System.out.println("*************************************************");
+                Connection connection = Jsoup.connect(text);
+                connection.header("user-agent", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36");
+                System.out.println(connection.get().body());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }).collect(Collectors.toList());
+    }
+
+    @Test
+    public void test14() throws IOException {
+        Document document = Jsoup.connect("https://store.taobao.com/shop/view_shop.htm?user_number_id=2200660685808&rn=b3941d00bca5af9eae2136bf6534c28b").execute().parse();
+        Elements mallSearch = document.getElementsByClass("mallSearch-input");
+        Element element = mallSearch.get(0);
+        String attr = element.child(0).child(0).attr("data-current");
+        System.out.println(attr);
     }
 }
